@@ -73,9 +73,9 @@ import java_cup.runtime.*;
 /***********************/
 LineTerminator	= \r|\n|\r\n
 WhiteSpace		= {LineTerminator} | [ \t]
-INTEGER			= 0 | [1-9][0-9]*
-ID				= [a-z]+
-
+ID				= [a-z]+{ID}				{ return symbol(TokenNames.ID,     yytext());}
+INT			= 0 | [1-9][0-9]*
+STRING		= \"[a-zA-Z]*\"
 /******************************/
 /* DOLLAR DOLLAR - DON'T TOUCH! */
 /******************************/
@@ -98,10 +98,36 @@ ID				= [a-z]+
 "-"					{ return symbol(TokenNames.MINUS);}
 "PPP"				{ return symbol(TokenNames.TIMES);}
 "/"					{ return symbol(TokenNames.DIVIDE);}
+"="					{ return symbol(TokenNames.EQ);}
+"<"					{ return symbol(TokenNames.LT);}
+">"					{ return symbol(TokenNames.GT);}
+"and"				{ return symbol(TokenNames.AND);}
+"or"				{ return symbol(TokenNames.OR);}
 "("					{ return symbol(TokenNames.LPAREN);}
 ")"					{ return symbol(TokenNames.RPAREN);}
-{INTEGER}			{ return symbol(TokenNames.NUMBER, Integer.valueOf(yytext()));}
+"["					{ return symbol(TokenNames.LBRACK);}
+"]"					{ return symbol(TokenNames.RBRACK);}
+"{"					{ return symbol(TokenNames.LBRACE);}
+"}"					{ return symbol(TokenNames.RBRACE);}
+","					{ return symbol(TokenNames.COMMA);}
+"."					{ return symbol(TokenNames.DOT);}
+";"					{ return symbol(TokenNames.SEMICOLON);}
+":="				{ return symbol(TokenNames.ASSIGN);}
+"array"				{ return symbol(TokenNames.ARRAY);}
+"class"				{ return symbol(TokenNames.CLASS);}
+"extends"			{ return symbol(TokenNames.EXTENDS);}
+"new"				{ return symbol(TokenNames.NEW);}
+"nil"				{ return symbol(TokenNames.NIL);}
+"if"				{ return symbol(TokenNames.IF);}
+"else"				{ return symbol(TokenNames.ELSE);}
+"while"				{ return symbol(TokenNames.WHILE);}
+"return"			{ return symbol(TokenNames.RETURN);}
+"int"				{ return symbol(TokenNames.TYPE_INT);}
+"string"			{ return symbol(TokenNames.TYPE_STRING);}
+"void"				{ return symbol(TokenNames.TYPE_VOID);}
 {ID}				{ return symbol(TokenNames.ID,     yytext());}
+{INT}			{ return symbol(TokenNames.INT, Integer.valueOf(yytext()));}
+{STRING}			{ return symbol(TokenNames.STRING, Integer.valueOf(yytext()));}
 {WhiteSpace}		{ /* just skip what was found, do nothing */ }
 <<EOF>>				{ return symbol(TokenNames.EOF);}
 }
