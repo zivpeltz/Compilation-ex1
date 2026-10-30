@@ -71,11 +71,17 @@ import java_cup.runtime.*;
 /***********************/
 /* MACRO DECLARATIONS */
 /***********************/
-LineTerminator	= \r|\n|\r\n
-WhiteSpace		= {LineTerminator} | [ \t]
-ID				= [a-z]+{ID}				{ return symbol(TokenNames.ID,     yytext());}
-INT			= 0 | [1-9][0-9]*
-STRING		= \"[a-zA-Z]*\"
+LineTerminator = \r|\n|\r\n
+WhiteSpace     = {LineTerminator} | [ \t]
+ID             = [a-zA-Z][a-zA-Z0-9]*
+INT            = 0 | [1-9][0-9]*
+LEADING_ZERO   = 0[0-9]+
+STRING         = \"[a-zA-Z]*\"
+ValidCommentChars = [a-zA-Z0-9 \t\(\)\[\]\{\}\?\!\+\-\*\/\.\;]
+
+%state COMMENT_1
+%state COMMENT_2
+
 /******************************/
 /* DOLLAR DOLLAR - DON'T TOUCH! */
 /******************************/
@@ -93,10 +99,11 @@ STRING		= \"[a-zA-Z]*\"
 /**************************************************************/
 
 <YYINITIAL> {
-
+"//"                { yybegin(COMMENT_1); }
+"/*"                { yybegin(COMMENT_2); }
 "+"					{ return symbol(TokenNames.PLUS);}
 "-"					{ return symbol(TokenNames.MINUS);}
-"PPP"				{ return symbol(TokenNames.TIMES);}
+"*"					{ return symbol(TokenNames.TIMES);}
 "/"					{ return symbol(TokenNames.DIVIDE);}
 "="					{ return symbol(TokenNames.EQ);}
 "<"					{ return symbol(TokenNames.LT);}
@@ -126,8 +133,39 @@ STRING		= \"[a-zA-Z]*\"
 "string"			{ return symbol(TokenNames.TYPE_STRING);}
 "void"				{ return symbol(TokenNames.TYPE_VOID);}
 {ID}				{ return symbol(TokenNames.ID,     yytext());}
-{INT}			{ return symbol(TokenNames.INT, Integer.valueOf(yytext()));}
-{STRING}			{ return symbol(TokenNames.STRING, Integer.valueOf(yytext()));}
+{LEADING_ZERO} {
+    return symbol(TokenNames.ERROR);
+}
+
+{INT} {
+    try {
+        int val = Integer.parseInt(yytext());
+        if (val > 32767) {
+            return symbol(TokenNames.ERROR);
+        }
+        return symbol(TokenNames.INT, val);
+    } catch (NumberFormatException e) {
+        return symbol(TokenNames.ERROR);
+    }
+}
+{STRING}			{ return symbol(TokenNames.STRING, yytext());}
 {WhiteSpace}		{ /* just skip what was found, do nothing */ }
 <<EOF>>				{ return symbol(TokenNames.EOF);}
+[^]                 { return symbol(TokenNames.ERROR); }
+}
+
+
+<COMMENT_1>{
+{LineTerminator}				{yybegin(YYINITIAL);}
+{ValidCommentChars} {}
+<<EOF>>				{ return symbol(TokenNames.ERROR);}
+[^]                 { return symbol(TokenNames.ERROR); }
+}
+
+<COMMENT_2>{
+"*/"				{yybegin(YYINITIAL);}
+{ValidCommentChars} {}
+{LineTerminator}    {}
+<<EOF>>				{ return symbol(TokenNames.ERROR);}
+[^]                 { return symbol(TokenNames.ERROR); }
 }
