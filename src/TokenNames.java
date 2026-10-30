@@ -36,4 +36,6 @@ public interface TokenNames {
   public static final int TYPE_STRING = 32;
   public static final int TYPE_VOID = 33;
   public static final int STRING = 34;
+  public static final int ERROR = 35;
+
 }
