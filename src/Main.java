@@ -79,6 +79,7 @@ public class Main
 			/********************************/
 			/* [5] Main reading tokens loop */
 			/********************************/
+			boolean firstToken = true;
 			while (s.sym != TokenNames.EOF)
 			{
 				/* if we encounter error the output file should contain only the word ERROR */
@@ -98,8 +99,12 @@ public class Main
 					tokenStr += "(" + s.value + ")";
 				}
 				tokenStr += "[" + l.getLine() + "," + l.getTokenStartPosition() + "]";
-
-				fileWriter.print(tokenStr + "\n");
+				
+				if (!firstToken) {
+					fileWriter.print("\n");
+				}
+				firstToken = false;
+				fileWriter.print(tokenStr);
 				s = l.next_token();
 			}
 			l.yyclose();
